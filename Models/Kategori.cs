@@ -7,7 +7,7 @@ namespace Elde_Tarif.Models
         public int Id { get; set; }
 
         [Required, MaxLength(200)]
-        public string Ad { get; set; } = null!;
+        public string Ad { get; set; } = string.Empty;
 
         [MaxLength(1000)]
         public string? Aciklama { get; set; }

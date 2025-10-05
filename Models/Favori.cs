@@ -2,7 +2,7 @@
 {
     public class Favori
     {
-        public string KullaniciId { get; set; } = null!;
+        public string KullaniciId { get; set; } = string.Empty;
         public AppUser Kullanici { get; set; } = null!;
 
         public int TarifId { get; set; }

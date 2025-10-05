@@ -12,7 +12,6 @@ namespace Elde_Tarif.Models
         public int MalzemeId { get; set; }
         public Malzeme Malzeme { get; set; } = null!;
 
-        // Diyagrama göre miktar/birim yerine serbest açıklama
         [MaxLength(500)]
         public string? Aciklama { get; set; }
     }

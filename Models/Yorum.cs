@@ -11,12 +11,12 @@ namespace Elde_Tarif.Models
 
         // Identity string PK'ye karşılık
         [Required]
-        public string KullaniciId { get; set; } = null!;
+        public string KullaniciId { get; set; } = string.Empty;
         public AppUser Kullanici { get; set; } = null!;
 
         public string? Icerik { get; set; } // text
 
-        public int? Puan { get; set; } // 1-5 gibi; validasyonu controller'da yap
+        public int? Puan { get; set; } 
         public DateTime OlusturulmaTarihi { get; set; } = DateTime.UtcNow;
     }
 }

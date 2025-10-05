@@ -1,5 +1,4 @@
-﻿// Data/AppDbContext.cs
-using Elde_Tarif.Models;
+﻿using Elde_Tarif.Models;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
@@ -22,7 +21,7 @@ namespace Elde_Tarif.Data
         {
             base.OnModelCreating(b);
 
-            // Tablo adları (isteğe bağlı): diyagramla uyumlu okunur isimler
+            //Tablo isimleri
             b.Entity<Kategori>().ToTable("Kategori");
             b.Entity<Sef>().ToTable("Sef");
             b.Entity<Malzeme>().ToTable("Malzeme");
@@ -35,12 +34,6 @@ namespace Elde_Tarif.Data
             // Kısıtlar & Hassasiyetler
             b.Entity<Tarif>(e =>
             {
-                e.Property(x => x.PorsiyonSayisi).HasPrecision(6, 2);
-                e.Property(x => x.KaloriKcal).HasPrecision(8, 2);
-                e.Property(x => x.ProteinGr).HasPrecision(8, 2);
-                e.Property(x => x.KarbonhidratGr).HasPrecision(8, 2);
-                e.Property(x => x.YagGr).HasPrecision(8, 2);
-
                 e.HasOne(x => x.Kategori)
                     .WithMany(k => k.Tarifler)
                     .HasForeignKey(x => x.KategoriId)
