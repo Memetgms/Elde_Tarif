@@ -2,7 +2,7 @@
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
-namespace Elde_Tarif.Data
+namespace Elde_Tarif
 {
     public class AppDbContext : IdentityDbContext<AppUser>
     {

@@ -13,8 +13,8 @@ namespace Elde_Tarif.Models
         public int KategoriId { get; set; }
         public Kategori Kategori { get; set; } = null!;
 
-        public int SefId { get; set; }
-        public Sef Sef { get; set; } = null!;
+        public int? SefId { get; set; }
+        public Sef? Sef { get; set; }
 
         [MaxLength(500)]
         public string? KapakFotoUrl { get; set; }
