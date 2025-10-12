@@ -28,4 +28,13 @@ namespace Elde_Tarif.DTO
         public int? KarbonhidratGr { get; set; }
         public int? YagGr { get; set; }
     }
+    public class TarifMalzemesiCreateDto
+    {
+        [Required]
+        public int MalzemeId { get; set; }
+
+        [MaxLength(200)]
+        public string? Aciklama { get; set; }
+
+    }
 }
