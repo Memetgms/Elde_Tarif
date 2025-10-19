@@ -13,6 +13,7 @@ namespace Elde_Tarif.Models
         public string? Aciklama { get; set; }
 
         public int? Sira { get; set; }
+        public string KategoriUrl{ get; set; }
 
         public ICollection<Tarif> Tarifler { get; set; } = new List<Tarif>();
     }

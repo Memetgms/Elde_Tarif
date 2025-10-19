@@ -2,7 +2,7 @@
 
 namespace Elde_Tarif.DTO
 {
-    public class TarifCreateDto
+    public class TarifEklemeDto
     {
         [Required(ErrorMessage = "Başlık alanı zorunludur.")]
         [MaxLength(250)]
@@ -28,7 +28,7 @@ namespace Elde_Tarif.DTO
         public int? KarbonhidratGr { get; set; }
         public int? YagGr { get; set; }
     }
-    public class TarifMalzemesiCreateDto
+    public class TarifMalzemesiEklemeDto
     {
         [Required]
         public int MalzemeId { get; set; }
@@ -36,5 +36,11 @@ namespace Elde_Tarif.DTO
         [MaxLength(200)]
         public string? Aciklama { get; set; }
 
+    }
+    public class TarifYapimAdimiEklemeDto
+    {
+        public int? Sira { get; set; }          // boş gelebilir, otomatik verilir
+        [MaxLength(2000)]
+        public string? Aciklama { get; set; }   // adım metni
     }
 }

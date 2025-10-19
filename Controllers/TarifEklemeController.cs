@@ -2,22 +2,23 @@
 using Elde_Tarif.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-
+//Burada tarif ekleme, tarif malzemeleri ekleme ve tarif yapım adımları ekleme
+//işlemleri için gerekli API uç noktaları bulunmaktadır.
 namespace Elde_Tarif.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class TariflerController : ControllerBase
+    public class TarifEklemeController : ControllerBase
     {
         private readonly AppDbContext _context;
-        public TariflerController(AppDbContext context)
+        public TarifEklemeController(AppDbContext context)
         {
             _context = context;
         }
 
-        // POST: api/Tarifler tarif ekleme
+        // POST: api/TarifEkleme tarif ekleme
         [HttpPost]
-        public async Task<IActionResult> CreateTarif([FromBody] TarifCreateDto tarifDto)
+        public async Task<IActionResult> CreateTarif([FromBody] TarifEklemeDto tarifDto)
         {
             if (!ModelState.IsValid)
             {
@@ -65,9 +66,9 @@ namespace Elde_Tarif.Controllers
             return NoContent(); // HTTP 204
         }
 
-        // POST: api/tarifler/{tarifId}/malzemeler tarife malzeme ekleme
+        // POST: api/tarifekleme/{tarifId}/malzemeler tarife malzeme ekleme
         [HttpPost("{tarifId:int}/malzemeler")]
-        public async Task<IActionResult> AddMalzemeler(int tarifId, [FromBody] List<TarifMalzemesiCreateDto> items)
+        public async Task<IActionResult> AddMalzemeler(int tarifId, [FromBody] List<TarifMalzemesiEklemeDto> items)
         {
             if (items is null || items.Count == 0)
                 return BadRequest("En az bir malzeme gönderin.");
@@ -129,9 +130,9 @@ namespace Elde_Tarif.Controllers
             return Ok($"Tarife malzeme ekleme tamamlandı. Eklenen: {eklenen}, Atlanan: {atlanan}.");
         }
 
-        // POST: api/tarifler/{tarifId}/yapim-adimlari  ilgili tarife yapım adımları ekleme
+        // POST: api/tarifekleme/{tarifId}/yapim-adimlari  ilgili tarife yapım adımları ekleme
         [HttpPost("{tarifId:int}/yapim-adimlari")]
-        public async Task<IActionResult> AddYapimAdimlari(int tarifId, [FromBody] List<YapimAdimiEklemeDto> items)
+        public async Task<IActionResult> AddYapimAdimlari(int tarifId, [FromBody] List<TarifYapimAdimiEklemeDto> items)
         {
             if (items is null || items.Count == 0)
                 return BadRequest("En az bir yapım adımı gönderin.");
