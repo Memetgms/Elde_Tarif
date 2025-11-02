@@ -43,5 +43,38 @@ namespace Elde_Tarif.Controllers
             await _context.SaveChangesAsync();
             return Ok("Şef başarıyla eklendi.");
         }
+
+        // GET: api/sef/{id}
+        [HttpGet("{id:int}")]
+        public async Task<IActionResult> GetSefWithTarifler(int id)
+        {
+            var sef = await _context.Sefler
+                .Include(s => s.Tarifler)
+                .ThenInclude(t => t.Kategori) // kategori bilgisi de dahil olsun
+                .Where(s => s.Id == id)
+                .Select(s => new
+                {
+                    s.Id,
+                    s.Ad,
+                    s.FotoUrl,
+                    s.Aciklama,
+                    Tarifler = s.Tarifler.Select(t => new
+                    {
+                        t.Id,
+                        t.Baslik,
+                        t.KapakFotoUrl,
+                        t.KategoriId,
+                        KategoriAdi = t.Kategori.Ad,
+                        t.HazirlikSuresiDakika,
+                        t.PorsiyonSayisi,
+                    })
+                })
+                .FirstOrDefaultAsync();
+
+            if (sef == null)
+                return NotFound("Belirtilen ID'ye sahip bir şef bulunamadı.");
+
+            return Ok(sef);
+        }
     }
 }

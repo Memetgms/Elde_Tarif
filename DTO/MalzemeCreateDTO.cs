@@ -15,4 +15,12 @@ namespace Elde_Tarif.DTO
 
         public bool Aktif { get; set; } = true;
     }
+    
+    public class MalzemeGetDTO
+    {
+        public int Id { get; set; }
+        public string Ad { get; set; } = string.Empty;
+        public string? MalzemeTur { get; set; }=string.Empty;
+
+    }
 }

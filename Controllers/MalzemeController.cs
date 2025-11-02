@@ -1,6 +1,7 @@
 ﻿using Elde_Tarif.DTO;
 using Elde_Tarif.Models;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace Elde_Tarif.Controllers
 {
@@ -34,6 +35,21 @@ namespace Elde_Tarif.Controllers
             await _context.SaveChangesAsync();
 
             return Ok("Malzemeler başarıyla eklendi.");
+        }
+
+        // MALZEME LİSTELEME api/malzeme
+        [HttpGet]
+        public async Task<IActionResult> GetMalzemeler()
+        {
+            var malzemeler = await _context.Malzemeler.Where(m => m.Aktif)
+                .Select(m => new MalzemeGetDTO
+                {
+                    Id = m.Id,
+                    Ad = m.Ad,
+                    MalzemeTur = m.MalzemeTur,
+                })
+                .ToListAsync();
+            return Ok(malzemeler);
         }
     }
 }
