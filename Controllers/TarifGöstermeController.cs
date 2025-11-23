@@ -40,7 +40,7 @@ namespace Elde_Tarif.Controllers
             return Ok(tarifler);
         }
 
-        // TARİF ÖNİZLEME (Sadece ID, Başlık, Foto)
+        // TARİF ÖNİZLEME (Sadece ID, Başlık, Foto, Süre, ŞefId, KategoriId)
         [HttpGet("api/tarifonizleme")]
         public async Task<ActionResult<IEnumerable<TarifOnizlemeDto>>> GetTarifOnizleme()
         {
@@ -49,7 +49,11 @@ namespace Elde_Tarif.Controllers
                 {
                     Id = t.Id,
                     Baslik = t.Baslik,
-                    KapakFotoUrl = t.KapakFotoUrl
+                    KapakFotoUrl = t.KapakFotoUrl,
+                    PorsiyonSayisi = t.PorsiyonSayisi,
+                    ToplamSure = (t.HazirlikSuresiDakika ?? 0) + (t.PismeSuresiDakika ?? 0),
+                    SefId = t.SefId,
+                    KategoriId = t.KategoriId
                 })
                 .ToListAsync();
 
@@ -125,6 +129,30 @@ namespace Elde_Tarif.Controllers
             };
 
             return Ok(dto);
+        }
+
+        // GET: api/tarifler/kategori/5
+        [HttpGet("tarifbykategori/{id:int}")]
+        public async Task<ActionResult<IEnumerable<TarifOnizlemeDto>>> GetTarifbyKategori(int id)
+        {
+            // Kategori var mı?
+            var kategoriVarMi = await _context.Kategoriler.AnyAsync(k => k.Id == id);
+            if (!kategoriVarMi)
+                return NotFound($"ID'si {id} olan bir kategori bulunamadı.");
+
+            var tarifler = await _context.Tarifler
+                .Where(t => t.KategoriId == id)    
+                .OrderByDescending(t => t.OlusturulmaTarihi)
+                .Select(t => new TarifOnizlemeDto
+                {
+                    Id = t.Id,
+                    Baslik = t.Baslik,
+                    KapakFotoUrl = t.KapakFotoUrl,
+                    ToplamSure=t.HazirlikSuresiDakika + t.PismeSuresiDakika
+                })
+                .ToListAsync();
+
+            return Ok(tarifler);
         }
     }
 }

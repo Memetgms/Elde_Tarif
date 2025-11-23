@@ -16,6 +16,8 @@ namespace Elde_Tarif.Models
         public string? MalzemeTur { get; set; }
 
         public bool Aktif { get; set; } = true;
+        [Range(0.0, 5.0)]
+        public double OnemKatsayisi { get; set; } = 1.0;
 
         public ICollection<TarifMalzemesi> TarifMalzemeleri { get; set; } = new List<TarifMalzemesi>();
     }

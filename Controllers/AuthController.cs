@@ -1,12 +1,12 @@
-﻿using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
-using System.Text;
-using Elde_Tarif.DTO;
+﻿using Elde_Tarif.DTO;
 using Elde_Tarif.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using System.Security.Cryptography;
+using System.Text;
 
 namespace Elde_Tarif.Controllers
 {
@@ -18,29 +18,28 @@ namespace Elde_Tarif.Controllers
         private readonly SignInManager<AppUser> _signInManager;
         private readonly IConfiguration _cfg;
 
-        public AuthController(
-            UserManager<AppUser> userManager,
-            SignInManager<AppUser> signInManager,
-            IConfiguration cfg)
+        public AuthController(UserManager<AppUser> userManager,
+                              SignInManager<AppUser> signInManager,
+                              IConfiguration cfg)
         {
             _userManager = userManager;
             _signInManager = signInManager;
             _cfg = cfg;
         }
 
-        // POST: api/auth/register
         [HttpPost("register")]
         public async Task<IActionResult> Register([FromBody] RegisterDto dto)
         {
-            if (!ModelState.IsValid) return BadRequest(ModelState);
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            var exists = await _userManager.FindByEmailAsync(dto.Email);
+            if (exists != null)
+                return BadRequest("Bu e-posta zaten kayıtlı.");
 
             var username = string.IsNullOrWhiteSpace(dto.UserName)
                 ? dto.Email.Split('@')[0]
-                : dto.UserName.Trim();
-
-            var existingUser = await _userManager.FindByEmailAsync(dto.Email);
-            if (existingUser != null)
-                return BadRequest("Bu e-posta adresi zaten kayıtlı.");
+                : dto.UserName!.Trim();
 
             var user = new AppUser
             {
@@ -50,20 +49,30 @@ namespace Elde_Tarif.Controllers
 
             var result = await _userManager.CreateAsync(user, dto.Password);
             if (!result.Succeeded)
-                return BadRequest(result.Errors.Select(e => e.Description));
+                return BadRequest(result.Errors.Select(x => x.Description));
 
             var token = CreateJwtToken(user);
+            var refreshToken = GenerateRefreshToken();
 
-            return Ok(new { message = "Kayıt başarılı", token });
+            user.RefreshToken = refreshToken;
+            user.RefreshTokenExpireDate = DateTime.UtcNow.AddDays(7);
+            await _userManager.UpdateAsync(user);
+
+            return Ok(new
+            {
+                message = "Kayıt başarılı",
+                token,
+                refreshToken
+            });
         }
 
-        // POST: api/auth/login
         [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] LoginDto dto)
         {
-            if (!ModelState.IsValid) return BadRequest(ModelState);
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
 
-            AppUser? user = dto.EmailOrUserName.Contains('@')
+            AppUser? user = dto.EmailOrUserName.Contains("@")
                 ? await _userManager.FindByEmailAsync(dto.EmailOrUserName)
                 : await _userManager.FindByNameAsync(dto.EmailOrUserName);
 
@@ -72,47 +81,120 @@ namespace Elde_Tarif.Controllers
 
             var passwordValid = await _userManager.CheckPasswordAsync(user, dto.Password);
             if (!passwordValid)
-                return Unauthorized("Geçersiz parola.");
+                return Unauthorized("Geçersiz şifre.");
 
             var token = CreateJwtToken(user);
+            var refreshToken = GenerateRefreshToken();
 
-            return Ok(new { message = "Giriş başarılı", token });
+            user.RefreshToken = refreshToken;
+            user.RefreshTokenExpireDate = DateTime.UtcNow.AddDays(7);
+            await _userManager.UpdateAsync(user);
+
+            return Ok(new
+            {
+                message = "Giriş başarılı",
+                token,
+                refreshToken
+            });
         }
 
-        
+        [HttpPost("refresh-token")]
+        public async Task<IActionResult> RefreshToken([FromBody] string refreshToken)
+        {
+            if (string.IsNullOrEmpty(refreshToken))
+                return BadRequest("Refresh token gerekli.");
+
+            var user = _userManager.Users.FirstOrDefault(u => u.RefreshToken == refreshToken);
+            if (user == null)
+                return Unauthorized("Geçersiz refresh token.");
+
+            if (user.RefreshTokenExpireDate == null || user.RefreshTokenExpireDate < DateTime.UtcNow)
+                return Unauthorized("Refresh token süresi dolmuş.");
+
+            var newAccessToken = CreateJwtToken(user);
+            var newRefreshToken = GenerateRefreshToken();
+
+            user.RefreshToken = newRefreshToken;
+            user.RefreshTokenExpireDate = DateTime.UtcNow.AddDays(7);
+            await _userManager.UpdateAsync(user);
+
+            return Ok(new
+            {
+                token = newAccessToken,
+                refreshToken = newRefreshToken
+            });
+        }
+
+        [HttpPost("logout")]
+        public async Task<IActionResult> Logout()
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (userId == null)
+                return Unauthorized();
+
+            var user = await _userManager.FindByIdAsync(userId);
+            if (user == null)
+                return Unauthorized();
+
+            user.RefreshToken = null;
+            user.RefreshTokenExpireDate = null;
+            await _userManager.UpdateAsync(user);
+
+            return Ok("Çıkış yapıldı.");
+        }
+
+        [HttpGet("me")]
+        public async Task<IActionResult> Me()
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (userId == null)
+                return Unauthorized();
+
+            var user = await _userManager.FindByIdAsync(userId);
+            if (user == null)
+                return Unauthorized();
+
+            return Ok(new
+            {
+                id = user.Id,
+                email = user.Email,
+                userName = user.UserName
+            });
+        }
+
         private string CreateJwtToken(AppUser user)
         {
-            
+            var jwt = _cfg.GetSection("Jwt");
 
-            var key = _cfg["Jwt:Key"]!;
-            var issuer = _cfg["Jwt:Issuer"];
-            var audience = _cfg["Jwt:Audience"];
-            var expireMinutes = int.TryParse(_cfg["Jwt:ExpireMinutes"], out var m) ? m : 60;
+            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwt["Key"]!));
+            var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+
+            var expires = DateTime.UtcNow.AddMinutes(int.Parse(jwt["ExpireMinutes"]!));
 
             var claims = new List<Claim>
             {
-                new(JwtRegisteredClaimNames.Sub, user.Id),
-                new(JwtRegisteredClaimNames.Email, user.Email ?? ""),
-                new(ClaimTypes.NameIdentifier, user.Id),
-                new(ClaimTypes.Name, user.UserName ?? "")
+                new Claim(ClaimTypes.NameIdentifier, user.Id),
+                new Claim(ClaimTypes.Name, user.UserName ?? ""),
+                new Claim(JwtRegisteredClaimNames.Email, user.Email ?? "")
             };
 
-            var creds = new SigningCredentials(
-                new SymmetricSecurityKey(Encoding.UTF8.GetBytes(key)),
-                SecurityAlgorithms.HmacSha256
-            );
-
-            var expires = DateTime.UtcNow.AddMinutes(expireMinutes);
-
             var token = new JwtSecurityToken(
-                issuer: issuer,
-                audience: audience,
+                issuer: jwt["Issuer"],
+                audience: jwt["Audience"],
                 claims: claims,
                 expires: expires,
                 signingCredentials: creds
             );
 
             return new JwtSecurityTokenHandler().WriteToken(token);
+        }
+
+        private string GenerateRefreshToken()
+        {
+            var bytes = new byte[32];
+            using var rng = RandomNumberGenerator.Create();
+            rng.GetBytes(bytes);
+            return Convert.ToBase64String(bytes);
         }
     }
 }

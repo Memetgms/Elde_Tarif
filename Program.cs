@@ -39,18 +39,26 @@ builder.Services
     .AddJwtBearer(options =>
     {
         var cfg = builder.Configuration;
+
         options.TokenValidationParameters = new TokenValidationParameters
         {
             ValidateIssuerSigningKey = true,
             IssuerSigningKey = new SymmetricSecurityKey(
-                Encoding.UTF8.GetBytes(cfg["Jwt:Key"]!)),
-            ValidateIssuer = false,
-            ValidateAudience = false,
+                Encoding.UTF8.GetBytes(cfg["Jwt:Key"]!)
+            ),
+
+            ValidateIssuer = true,
+            ValidIssuer = cfg["Jwt:Issuer"],
+
+            ValidateAudience = true,
+            ValidAudience = cfg["Jwt:Audience"],
+
             ClockSkew = TimeSpan.Zero
         };
     });
 
 builder.Services.AddAuthorization();
+builder.Services.AddEndpointsApiExplorer();
 
 // OpenAPI (Swagger)
 builder.Services.AddOpenApi();

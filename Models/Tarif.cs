@@ -34,6 +34,7 @@ namespace Elde_Tarif.Models
         public bool Yayinda { get; set; } = false;
         public DateTime OlusturulmaTarihi { get; set; } = DateTime.UtcNow;
         public DateTime? GuncellenmeTarihi { get; set; }
+        public int? ClusterId { get; set; }
 
         // Navigations
         public ICollection<YapimAdimi> YapimAdimlari { get; set; } = new List<YapimAdimi>();
