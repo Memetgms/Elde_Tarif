@@ -2,6 +2,7 @@
 using Elde_Tarif.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
@@ -17,14 +18,18 @@ namespace Elde_Tarif.Controllers
         private readonly UserManager<AppUser> _userManager;
         private readonly SignInManager<AppUser> _signInManager;
         private readonly IConfiguration _cfg;
+        private readonly AppDbContext _context;
 
-        public AuthController(UserManager<AppUser> userManager,
-                              SignInManager<AppUser> signInManager,
-                              IConfiguration cfg)
+        public AuthController(
+            UserManager<AppUser> userManager,
+            SignInManager<AppUser> signInManager,
+            IConfiguration cfg,
+            AppDbContext context)
         {
             _userManager = userManager;
             _signInManager = signInManager;
             _cfg = cfg;
+            _context = context;
         }
 
         [HttpPost("register")]
@@ -150,17 +155,32 @@ namespace Elde_Tarif.Controllers
             if (userId == null)
                 return Unauthorized();
 
-            var user = await _userManager.FindByIdAsync(userId);
+            var user = await _userManager.Users
+                .Include(u => u.Favoriler)
+                .Include(u => u.Yorumlar)
+                .FirstOrDefaultAsync(u => u.Id == userId);
+
             if (user == null)
                 return Unauthorized();
 
-            return Ok(new
+            var ogunSayisi = await _context.GunlukOgunler
+                .CountAsync(x => x.KullaniciId == userId);
+
+            var dto = new ProfileDTO
             {
-                id = user.Id,
-                email = user.Email,
-                userName = user.UserName
-            });
+                Id = user.Id,
+                Email = user.Email,
+                UserName = user.UserName,
+                AdSoyad = user.AdSoyad,
+
+                FavoriSayisi = user.Favoriler.Count,
+                YorumSayisi = user.Yorumlar.Count,
+                OgunSayisi = ogunSayisi
+            };
+
+            return Ok(dto);
         }
+
 
         private string CreateJwtToken(AppUser user)
         {
@@ -196,5 +216,7 @@ namespace Elde_Tarif.Controllers
             rng.GetBytes(bytes);
             return Convert.ToBase64String(bytes);
         }
+        
+
     }
 }

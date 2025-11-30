@@ -4,6 +4,7 @@ using Elde_Tarif;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Elde_Tarif.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251129121100_AddGunlukTables")]
+    partial class AddGunlukTables
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -143,6 +146,31 @@ namespace Elde_Tarif.Migrations
                     b.HasIndex("TarifId");
 
                     b.ToTable("GunlukOgunler");
+                });
+
+            modelBuilder.Entity("Elde_Tarif.Models.GunlukSu", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("KullaniciId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<int>("Ml")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("Tarih")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("KullaniciId");
+
+                    b.ToTable("GunlukSular");
                 });
 
             modelBuilder.Entity("Elde_Tarif.Models.Kategori", b =>
@@ -560,6 +588,17 @@ namespace Elde_Tarif.Migrations
                     b.Navigation("Kullanici");
 
                     b.Navigation("Tarif");
+                });
+
+            modelBuilder.Entity("Elde_Tarif.Models.GunlukSu", b =>
+                {
+                    b.HasOne("Elde_Tarif.Models.AppUser", "Kullanici")
+                        .WithMany()
+                        .HasForeignKey("KullaniciId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Kullanici");
                 });
 
             modelBuilder.Entity("Elde_Tarif.Models.Tarif", b =>

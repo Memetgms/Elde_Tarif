@@ -1,15 +1,18 @@
-using System.Text;
 using Elde_Tarif;
 using Elde_Tarif.Models;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using System.Text;
+using YourNamespace.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Controllers
 builder.Services.AddControllers();
+// Gemini service (HttpClient ile)
+builder.Services.AddHttpClient<GeminiChatService>();
 
 // DbContext
 builder.Services.AddDbContext<AppDbContext>(opt =>
@@ -72,7 +75,9 @@ if (app.Environment.IsDevelopment())
 }
 
 // Middleware
-app.UseHttpsRedirection();
+app.UseRouting();
+//app.UseHttpsRedirection();
+
 app.UseStaticFiles();
 app.UseAuthentication();
 app.UseAuthorization();
