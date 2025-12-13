@@ -23,4 +23,14 @@ namespace Elde_Tarif.DTO
         public string Password { get; set; } = string.Empty;
 
     }
+    public class ConfirmEmailCodeDto
+    {
+        public string Email { get; set; } = null!;
+        public string Code { get; set; } = null!;
+    }
+    public class ResendCodeDto
+    {
+        public string Email { get; set; } = null!;
+    }
+
 }

@@ -10,6 +10,9 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Controllers
 builder.Services.AddControllers();
+// Email Sender
+builder.Services.AddScoped<IEmailSender, MailKitEmailSender>();
+
 
 // DbContext
 builder.Services.AddDbContext<AppDbContext>(opt =>
