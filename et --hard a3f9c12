@@ -1,0 +1,9 @@
+[33m50869da[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmaster[m[33m)[m Email doğrulama eklendi.
+[33mf09d02d[m Malzemeye göre tarif öneri endpointi yapıldı.
+[33md4ed9af[m Sef apisi ve Auth işlemleri yapıldı.
+[33m5feb4ee[m Kategori,Tarif gösterme ve Sef Controller eklendi - Dosya yapısı düzeltildi.
+[33m7134cc7[m Tarife malzeme ekleme ve yapım adımı ekleme endpointi eklendi.
+[33mfe94b1d[m Malzeme ve Tarif ekleme endpointi eklendi. Küçük değişiklikler yapıldı.
+[33m16115b9[m modellerde güncelleme yapıldı.
+[33m9357103[m Proje dosyası ekle.
+[33mf3f8749[m .gitattributes ve .gitignore ekleyin.

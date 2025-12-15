@@ -43,14 +43,15 @@ namespace Elde_Tarif.Controllers
             if (exists != null)
                 return BadRequest("Bu e-posta zaten kayıtlı.");
 
-            var username = string.IsNullOrWhiteSpace(dto.UserName)
-                ? dto.Email.Split('@')[0]
-                : dto.UserName!.Trim();
+            var usernameExists = await _userManager.FindByNameAsync(dto.UserName);
+            if (usernameExists != null)
+                return BadRequest("Bu kullanıcı adı zaten alınmış.");
 
             var user = new AppUser
             {
                 Email = dto.Email.Trim(),
-                UserName = username,
+                UserName = dto.UserName.Trim(),
+                AdSoyad = null,
                 EmailConfirmed = false
             };
 
@@ -65,13 +66,9 @@ namespace Elde_Tarif.Controllers
             user.EmailActivationExpiresAt = DateTime.UtcNow.AddMinutes(15);
             user.EmailActivationTryCount = 0;
 
-            // Refresh token'ı register'da istemiyorsan burada hiç verme (önerilen)
-            user.RefreshToken = null;
-            user.RefreshTokenExpireDate = null;
-
             var upd = await _userManager.UpdateAsync(user);
             if (!upd.Succeeded)
-                return StatusCode(500, "Kullanıcı güncellenemedi.");
+                return StatusCode(500, "Kullanıcı güncellenemedi.Tekrar deneyiniz!");
 
             // Mail gönder (sende çalışan MailKit mantığını buraya koy)
             var html = $@"
@@ -104,15 +101,20 @@ namespace Elde_Tarif.Controllers
                 : await _userManager.FindByNameAsync(dto.EmailOrUserName.Trim());
 
             if (user == null)
-                return Unauthorized("Kullanıcı bulunamadı.");
+                return Unauthorized("Kullanıcı adı veya şifre hatalı.");
 
             //  Email doğrulaması zorunlu
             if (!user.EmailConfirmed)
-                return Unauthorized("Email doğrulanmamış. Lütfen mailinize gelen kod ile doğrulayın.");
+                return Unauthorized(new
+                {
+                    code = "EMAIL_NOT_CONFIRMED",
+                    message = "Email doğrulanmamış.",
+                    email = user.Email // opsiyonel
+                });
 
             var passwordValid = await _userManager.CheckPasswordAsync(user, dto.Password);
             if (!passwordValid)
-                return Unauthorized("Geçersiz şifre.");
+                return Unauthorized("Kullanıcı adı veya şifre hatalı.");
 
             var token = CreateJwtToken(user);
             var refreshToken = GenerateRefreshToken();

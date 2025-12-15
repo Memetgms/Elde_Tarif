@@ -1,15 +1,18 @@
-using System.Text;
 using Elde_Tarif;
 using Elde_Tarif.Models;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using System.Text;
+using YourNamespace.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Controllers
 builder.Services.AddControllers();
+// Gemini Chat Service
+builder.Services.AddHttpClient<GeminiChatService>();
 // Email Sender
 builder.Services.AddScoped<IEmailSender, MailKitEmailSender>();
 

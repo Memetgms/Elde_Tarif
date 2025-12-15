@@ -13,11 +13,11 @@ namespace Elde_Tarif.DTO
 
     public class RegisterDto
     {
+        [Required, MaxLength(64)]
+        public string UserName { get; set; } = string.Empty;
+
         [Required, EmailAddress, MaxLength(256)]
         public string Email { get; set; } = string.Empty;
-
-        [MaxLength(64)]
-        public string? UserName { get; set; }
 
         [Required, MinLength(6), MaxLength(100)]
         public string Password { get; set; } = string.Empty;
