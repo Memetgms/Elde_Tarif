@@ -73,8 +73,9 @@ namespace YourNamespace.Controllers
                     Reply = reply
                 });
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                Console.WriteLine("Gemini hata: " + ex);
                 // Log ekleyebilirsin
                 return StatusCode(500, new ChatResponseDTO
                 {

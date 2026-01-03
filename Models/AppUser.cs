@@ -13,5 +13,7 @@ namespace Elde_Tarif.Models
         // İlişkiler
         public ICollection<Yorum> Yorumlar { get; set; } = new List<Yorum>();
         public ICollection<Favori> Favoriler { get; set; } = new List<Favori>();
+        public ICollection<TarifGoruntuleme> TarifGoruntulemeler { get; set; } = new List<TarifGoruntuleme>();
+
     }
 }

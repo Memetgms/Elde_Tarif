@@ -41,5 +41,7 @@ namespace Elde_Tarif.Models
         public ICollection<TarifMalzemesi> TarifMalzemeleri { get; set; } = new List<TarifMalzemesi>();
         public ICollection<Yorum> Yorumlar { get; set; } = new List<Yorum>();
         public ICollection<Favori> Favoriler { get; set; } = new List<Favori>();
+        public ICollection<TarifGoruntuleme> Goruntulemeler { get; set; } = new List<TarifGoruntuleme>();
+
     }
 }

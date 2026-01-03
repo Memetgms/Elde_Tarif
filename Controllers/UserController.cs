@@ -11,11 +11,11 @@ namespace Elde_Tarif.Controllers
     [ApiController]
     [Route("api/[controller]")]
     [Authorize] 
-    public class USerController : ControllerBase
+    public class UserController : ControllerBase
     {
         private readonly AppDbContext _context;
         private readonly UserManager<AppUser> _userManager;
-        public USerController(AppDbContext context, UserManager<AppUser> userManager)
+        public UserController(AppDbContext context, UserManager<AppUser> userManager)
         {
             _context = context;
             _userManager=userManager;

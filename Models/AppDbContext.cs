@@ -17,6 +17,8 @@ namespace Elde_Tarif
         public DbSet<Yorum> Yorumlar => Set<Yorum>();
         public DbSet<Favori> Favoriler => Set<Favori>();
         public DbSet<GunlukOgun> GunlukOgunler => Set<GunlukOgun>();
+        public DbSet<TarifGoruntuleme> TarifGoruntulemeler => Set<TarifGoruntuleme>();
+
 
 
         protected override void OnModelCreating(ModelBuilder b)
@@ -108,6 +110,25 @@ namespace Elde_Tarif
                  .HasForeignKey(x => x.TarifId)
                  .OnDelete(DeleteBehavior.Cascade);
             });
+
+            b.Entity<TarifGoruntuleme>().ToTable("TarifGoruntuleme");
+
+            b.Entity<TarifGoruntuleme>(e =>
+            {
+                e.HasOne(x => x.Tarif)
+                    .WithMany(t => t.Goruntulemeler)
+                    .HasForeignKey(x => x.TarifId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                e.HasOne(x => x.Kullanici)
+                    .WithMany(u => u.TarifGoruntulemeler)
+                    .HasForeignKey(x => x.KullaniciId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                e.HasIndex(x => new { x.KullaniciId, x.TarifId, x.ViewedAt });
+                e.HasIndex(x => new { x.AnonId, x.TarifId, x.ViewedAt });
+            });
+
 
             // Basit index örnekleri
             b.Entity<Kategori>().HasIndex(x => x.Ad);

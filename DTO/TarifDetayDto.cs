@@ -27,14 +27,14 @@
         public DateTime? GuncellenmeTarihi { get; set; }
 
         public int FavoriSayisi { get; set; }
-        public bool? KullaniciFavoriMi { get; set; } // null: anonim kullanıcı
+        public bool? KullaniciFavoriMi { get; set; } // null: anonim
 
         public double? OrtalamaPuan { get; set; }
         public int YorumSayisi { get; set; }
 
         public List<DetayMalzemeDto> Malzemeler { get; set; } = new();
         public List<DetayYapimAdimiDto> YapimAdimlari { get; set; } = new();
-        public List<DetayYorumDto> SonYorumlar { get; set; } = new(); // örnek: son 5
+        public List<DetayYorumDto> SonYorumlar { get; set; } = new(); // örn son 5
     }
 
     public class DetayMalzemeDto
@@ -56,7 +56,9 @@
     {
         public int Id { get; set; }
         public string KullaniciId { get; set; } = string.Empty;
-        public string? KullaniciAdSoyad { get; set; }
+
+        public string UserName { get; set; } = string.Empty;
+
         public string? Icerik { get; set; }
         public int? Puan { get; set; }
         public DateTime OlusturulmaTarihi { get; set; }
