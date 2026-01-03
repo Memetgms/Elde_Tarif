@@ -78,7 +78,9 @@ if (app.Environment.IsDevelopment())
 }
 
 // Middleware
-app.UseHttpsRedirection();
+app.UseRouting();
+//app.UseHttpsRedirection();
+
 app.UseStaticFiles();
 app.UseAuthentication();
 app.UseAuthorization();

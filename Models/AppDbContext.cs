@@ -97,7 +97,6 @@ namespace Elde_Tarif
                     .HasForeignKey(f => f.TarifId)
                     .OnDelete(DeleteBehavior.Cascade);
             });
-
             b.Entity<GunlukOgun>(e =>
             {
                 e.HasOne(x => x.Kullanici)
@@ -105,36 +104,45 @@ namespace Elde_Tarif
                  .HasForeignKey(x => x.KullaniciId)
                  .OnDelete(DeleteBehavior.Cascade);
 
-                e.HasOne(x => x.Tarif)
-                 .WithMany()
-                 .HasForeignKey(x => x.TarifId)
-                 .OnDelete(DeleteBehavior.Cascade);
+                b.Entity<GunlukOgun>(e =>
+                {
+                    e.HasOne(x => x.Kullanici)
+                     .WithMany()
+                     .HasForeignKey(x => x.KullaniciId)
+                     .OnDelete(DeleteBehavior.Cascade);
+
+                    e.HasOne(x => x.Tarif)
+                     .WithMany()
+                     .HasForeignKey(x => x.TarifId)
+                     .OnDelete(DeleteBehavior.Cascade);
+                });
+
+                b.Entity<TarifGoruntuleme>().ToTable("TarifGoruntuleme");
+
+                b.Entity<TarifGoruntuleme>(e =>
+                {
+                    e.HasOne(x => x.Tarif)
+                        .WithMany(t => t.Goruntulemeler)
+                        .HasForeignKey(x => x.TarifId)
+                        .OnDelete(DeleteBehavior.Cascade);
+
+                    e.HasOne(x => x.Kullanici)
+                        .WithMany(u => u.TarifGoruntulemeler)
+                        .HasForeignKey(x => x.KullaniciId)
+                        .OnDelete(DeleteBehavior.Cascade);
+
+                    e.HasIndex(x => new { x.KullaniciId, x.TarifId, x.ViewedAt });
+                    e.HasIndex(x => new { x.AnonId, x.TarifId, x.ViewedAt });
+                });
+
+
+                // Basit index örnekleri
+                b.Entity<Kategori>().HasIndex(x => x.Ad);
+                b.Entity<Sef>().HasIndex(x => x.Ad);
+                b.Entity<Malzeme>().HasIndex(x => x.Ad);
+                b.Entity<Tarif>().HasIndex(x => x.Baslik);
+
             });
-
-            b.Entity<TarifGoruntuleme>().ToTable("TarifGoruntuleme");
-
-            b.Entity<TarifGoruntuleme>(e =>
-            {
-                e.HasOne(x => x.Tarif)
-                    .WithMany(t => t.Goruntulemeler)
-                    .HasForeignKey(x => x.TarifId)
-                    .OnDelete(DeleteBehavior.Cascade);
-
-                e.HasOne(x => x.Kullanici)
-                    .WithMany(u => u.TarifGoruntulemeler)
-                    .HasForeignKey(x => x.KullaniciId)
-                    .OnDelete(DeleteBehavior.Cascade);
-
-                e.HasIndex(x => new { x.KullaniciId, x.TarifId, x.ViewedAt });
-                e.HasIndex(x => new { x.AnonId, x.TarifId, x.ViewedAt });
-            });
-
-
-            // Basit index örnekleri
-            b.Entity<Kategori>().HasIndex(x => x.Ad);
-            b.Entity<Sef>().HasIndex(x => x.Ad);
-            b.Entity<Malzeme>().HasIndex(x => x.Ad);
-            b.Entity<Tarif>().HasIndex(x => x.Baslik);
         }
     }
 }
